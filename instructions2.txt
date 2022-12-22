@@ -19,6 +19,9 @@ class Post(models.Model):
 
 2.Create views
 
+def index(request):
+    return render(request, 'index.html')
+
 Post View:
 
 def post_new(request):
@@ -33,10 +36,22 @@ def post_new(request):
         form = PostForm()
     return render(request, 'blog/post_edit.html', {'form': form})
 
+def post_new(request):
+    if request.method == "POST":
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user.profile
+            post.save()
+            return redirect(view_posts)
+    else:
+        form = PostForm()
+    return render(request, 'post_edit.html', {'form': form})
+
 View Posts View:
 
 def view_posts(request):
-    posts = Post.objects.filter(author=request.user.profile).order_by('created_date')
+    posts = Post.objects.order_by('-created_date')
     query = request.GET.get('q')
     if query:
         posts = posts.filter(
@@ -46,7 +61,7 @@ def view_posts(request):
     context = {
         'posts': posts
     }
-    return render(request, 'blog/view_posts.html', context)
+    return render(request, 'view_posts.html', context)
 
 3.Create templates
 
@@ -58,19 +73,29 @@ index.html
     </head>
     <body>
         <h1>Welcome to the blog!</h1>
-        <p>View all posts <a href="{% url 'view_posts' %}">here</a>.</p>
+        <p>View all posts <a href="/posts">here</a>.</p>
     </body>
 </html>
 
-post_detail.html
+view_posts.html
 
 <html>
     <head>
-        <title>{{ post.title }}</title>
+        <title>Posts</title>
     </head>
+    <form action="/posts/" method="GET">
+        <input type="text" name="q" />
+        <input type="submit" value="Search" />
+    </form>
     <body>
-        <h1>{{ post.title }}</h1>
-        <p>{{ post.text }}</p>
+        <h1>Posts</h1>
+        {% for post in posts %}
+            <h2>{{ post.author.user }}</h2>
+            <p>{{ post.created_date }} in {{ post.author.location }}</p>
+            <h2>{{ post.title }}</h2>
+            <p>{{ post.text }}</p>
+            <br>
+        {% endfor %}
     </body>
 </html>
 
