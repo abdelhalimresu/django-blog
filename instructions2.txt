@@ -1,0 +1,98 @@
+1.Create two models
+
+Profile Model:
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    bio = models.TextField(max_length=500, blank=True)
+    location = models.CharField(max_length=30, blank=True)
+    birth_date = models.DateField(null=True, blank=True)
+
+Posts Model:
+
+class Post(models.Model):
+    author = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    text = models.TextField()
+    created_date = models.DateTimeField(auto_now_add=True)
+    published_date = models.DateTimeField(auto_now=True)
+
+2.Create views
+
+Post View:
+
+def post_new(request):
+    if request.method == "POST":
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user.profile
+            post.save()
+            return redirect('post_detail', pk=post.pk)
+    else:
+        form = PostForm()
+    return render(request, 'blog/post_edit.html', {'form': form})
+
+View Posts View:
+
+def view_posts(request):
+    posts = Post.objects.filter(author=request.user.profile).order_by('created_date')
+    query = request.GET.get('q')
+    if query:
+        posts = posts.filter(
+            Q(title__icontains=query) |
+            Q(text__icontains=query)
+        ).distinct()
+    context = {
+        'posts': posts
+    }
+    return render(request, 'blog/view_posts.html', context)
+
+3.Create templates
+
+index.html
+
+<html>
+    <head>
+        <title>Blog</title>
+    </head>
+    <body>
+        <h1>Welcome to the blog!</h1>
+        <p>View all posts <a href="{% url 'view_posts' %}">here</a>.</p>
+    </body>
+</html>
+
+post_detail.html
+
+<html>
+    <head>
+        <title>{{ post.title }}</title>
+    </head>
+    <body>
+        <h1>{{ post.title }}</h1>
+        <p>{{ post.text }}</p>
+    </body>
+</html>
+
+post_edit.html
+
+<html>
+    <head>
+        <title>Create a New Post</title>
+    </head>
+    <body>
+        <h1>Create a New Post</h1>
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Create" />
+        </form>
+    </body>
+</html>
+
+4.Create the form
+
+class PostForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ('title', 'text')
