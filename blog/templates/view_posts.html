@@ -1,13 +1,31 @@
+
 <html>
     <head>
-        <title>Posts</title>
+        <title>{{ title }}</title>
+        <style>
+            body {
+                font-family: Arial;
+            }
+            h1 {
+                color: #303030;
+            }
+            h2 {
+                color: #606060;
+            }
+            input {
+                background-color: #f2f2f2;
+                border: 1px solid #ccc;
+                padding: 8px;
+                margin: 10px 0;
+            }
+        </style>
     </head>
     <form action="/posts/" method="GET">
-        <input type="text" name="q" />
+        <input type="text" name="search" />
         <input type="submit" value="Search" />
     </form>
     <body>
-        <h1>Posts</h1>
+        <h1>{{ title }}:</h1>
         {% for post in posts %}
             <h2>{{ post.author.user }}</h2>
             <p>{{ post.created_date }} in {{ post.author.location }}</p>
