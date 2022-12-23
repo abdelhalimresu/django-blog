@@ -14,7 +14,7 @@ def index(request):
 @login_required(login_url='/admin/')
 def add_post(request):
     if request.method == 'POST':
-        post = PostForm(request.POST)
+        post = PostForm(request.POST, request.FILES)
         if post.is_valid():
             post = post.save(commit=False)
             post.author = request.user.profile

@@ -37,11 +37,12 @@
             color: #ffffff80;
         }
     </style>
-    <form action="/posts/" method="GET">
-        <input type="text" name="search" value="{{ search }}" />
-        <input type="submit" value="Search" />
-    </form>
     <body>
+        <p>Create a post <a href="/post/add">here</a>.</p>
+        <form action="/posts/" method="GET">
+            <input type="text" name="search" value="{{ search }}" />
+            <input type="submit" value="Search" />
+        </form>
         <h1>Posts Search <spn>{{search}}</spn></h1>
         <div class='a1'>
             {% for post in posts %}
@@ -50,7 +51,9 @@
                 <p> Date Create : {{ post.created_date }} <br>
                     Location : {{ post.author.location }}</p>
                 <h2 class='title'>{{ post.title }}</h2>
-                
+                {% if post.image %}
+                <img src="{{ post.image.url }}" height="50%" width="50%" >
+                {% endif %}
                 <p class='text'>{{ post.text }}</p>
             </div>
             {% endfor %}
