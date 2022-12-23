@@ -6,6 +6,10 @@ from django.db.models import Q
 from blog.forms import PostForm
 from blog.models import Post
 
+
+def index(request):
+    return render(request, 'index.html')
+
 # Create your views here.
 @login_required(login_url='/admin/')
 def add_post(request):
@@ -25,11 +29,11 @@ def add_post(request):
 
 def view_posts(request):
     search = request.GET.get('search')
-    # get all posts from the database: post = Post.objects...
     if search:
         posts = Post.objects.filter(
             Q(title__contains=search) | Q(text__contains=search)
             ).order_by('-created_date')
     else:
         posts = Post.objects.all().order_by('-created_date')
-    return render(request, 'view_posts.html', {'posts': posts, 'title': 'All Posts'})
+    context = {'posts': posts, 'title': 'All Posts', 'search': search if search else ''}
+    return render(request, 'view_posts.html', context)
